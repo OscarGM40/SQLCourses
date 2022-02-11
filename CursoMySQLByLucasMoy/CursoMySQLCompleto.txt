@@ -1,0 +1,64 @@
+									CURSO COMPLETO MYSQL
+
+Source: https://www.youtube.com/watch?v=_8MjEhfKRbI&ab_channel=LucasMoy
+
+Una base de datos realmente se explica lo que hace por su nombre,y es simplemente una herramienta para almacenar datos.Con el tiempo se han vuelto más complejas,con mejores interfaces y funcionalidades.
+
+Las DB guardan los datos en computadoras,normalmente en Data Centers con un gran nº de ellas.Es decir que guardan los datos de forma centralizada(en un único lugar)
+
+NOTA: hoy en día se ha agregado un nuevo tipo de base de datos,que son las blockchain,son bases de datos descentralizadas,ya que la componen cientos de computadoras,esto conlleva ciertas ventajas,como la veracidad de la data.
+
+Las DB se dividen en dos grupos: relacionales y no-relacionales.
+
+Una DB relacional es aquella que se basa en la relaciones que los datos tienen entre sí,y no se tienen en cuenta su orden de almacenamiento.En este tipo de DB los datos se guardan en tablas compuestas por filas y columnas.
+En la imagen puedo ver que hay 5 tablas relacionadas entre si.Esto implicará usar llaves primarias y foráneas.
+
+Las DB no-relacionales están diseñadas para modelos de datos especificos,y tienen esquemas flexibles para aplicaciones modernas.Son fáciles de desarrollar,tienen un gran rendimiento y además son escalables.
+Dado que todas las requests usan JSON y estas db usan JSON su integración es total.Redes sociales como Facebook la usaron debido a su flexibilidad y escalabilidad(varios gestores DB sincronizados en diferentes servers).
+
+La más famosa es MongoDb,luego está CouchDB,la cual está mejor preparada para la sincronización,o también Firebase,DynamoDB,etc...(SaaS). 
+Hay muchas más como Hadoop o Cassandra(son NoSQL??)
+
+					DIFERENCIAS ENTRE SQL Y NO-SQL
+
+La principal diferencia podría ser la madurez,ya que SQL lleva mucho tiempo en el mercado.
+La segunda podría ser la atomicidad(transacciones).
+Los estandares están bien definidos
+La escritura es bastante sencilla(SQL).
+
+La principal desventaja es el crecimiento,cuando hay muchas tablas las queries pueden tardar mucho,y también suelen presentar fallas en el momento de la respuesta.
+También es dificil realizar cambios en una DB.
+
+En cuanto a No-SQL como ventaja tiene que es muy flexible,es sumamente fácil agregar un campo o cambiar la estructura de la DB.
+TAmbién pueden escalar horizontalmente(replicacion o arquitectura distribuida).Si el rendimiento bajara se pueden instalar nuevos nodos para balancear la carga del trabajo fácilmente(crecimiento o escalabilidad horizontal).
+
+La principal desventaja de NoSQL es la atomicidad,la información en ocasiones no es consistente,dependiendo de los nodos en los que este replicada la DB.
+
+A la hora de elegir una DB hay que observar como se comportarán los datos.Si voy a desarrollar una aplicación donde sé que los datos tendrán una estructura bien definida iré bien con SQL,si por el contrario necesitaré flexibilidad mejor usar NoSQL.
+
+					COMO DISEÑAR UNA DB RELACIONAL
+
+Lo primero que hay que preguntarse es cúando debo diseñar la DB.La mayoría de proyectos comienzan definiendo los requerimientos que va a tener el sistema.
+Despues se desarrollan pantallas de como se verá la app(schemas).En este momento ya estamos preparados para diseñar una DB temporal inicial.
+
+No se debe ser inflexible en modificar esa DB inicial.Es posible que termine siendo algo diferente al diseño inicial.
+
+Es importante predecir lo más ajustado posible todos los componentes que va a necesitar nuestro sistema,aunque es muy dificil hacerlo al 100% en el principio.
+
+						TIPOS DE DATOS GENÉRICOS
+
+Normalmente los lenguajes SQL suelen tener estos tipos de datos:
+char(tamaño) : entre 0 y 256 caracteres
+varchar(tamaño): entre 0 y 65.535
+text: para textos largos
+TinyInt(tamaño): -128 a 127
+Int(tamaño): -2147483648 a 2147483647
+BingInt(tamaño): -92233372036854775808 a 92233372036854775807
+Double(tamaño,d): numeros grandes con coma decimal
+Date: 2021-09-10
+DateTime: 2021-09-10 10:05:05
+TimeStamp: 2021:09-10 10:05:05
+
+Fijate que Date solo guarda la fecha,mientras que DateTime guarda la hora.TimeStamp funciona igual que DateTime,pero lo van a quitar en el 2038,asi que es mejor no usarlo.
+
+minuto 30
