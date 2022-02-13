@@ -61,4 +61,131 @@ TimeStamp: 2021:09-10 10:05:05
 
 Fijate que Date solo guarda la fecha,mientras que DateTime guarda la hora.TimeStamp funciona igual que DateTime,pero lo van a quitar en el 2038,asi que es mejor no usarlo.
 
-minuto 30
+						DISEÑADORES DE BASES DE DATOS
+
+Para armar el diseño de DB puedo usar cualquier herramienta que lo permita.A la hora de relacionar las tablas tengo que pensar en las cardinalidades.
+Tomando nuestro diagrama de Academias-Alumnos-Profesores y Cursos:
+
+¿Un alumno puede matricularse en varias academias? <- sólo en una(luego le pongo academia_id)
+¿Una academia puede tener varios alumnos?Si
+¿Una academia puede tener varios profesores? Si
+
+¿Un profesor puede dar clase en varias academias? <- sólo en una en este ejemplo(luego academia_id)
+
+¿Un curso puede ser dictado por un sólo profesor? <- diremos que si,luego usaré profesor_id como nombre de la FK.Si fuera una relación n a m usaría profesores_id(?)
+
+¿Un alumno puede estar matriculado en varios cursos?Si,¿y un curso puede recibir varios alumnos?Pues también.
+IMPORTANTE: recuerda que cuando se da una relación ManyToMany en SQL se crea una tabla intermedia.
+La llamaremos Alumnos_por_cursos(puede tener cualquier nombre,pero que sea explicativo).Tendrá su id como PK,pero aparte dos campos más que serán FK
+
+Por último vamos a crear otra tabla notas.Fijate que podria tener como id la union del alumno y el curso,pero de momento lo haremos simple.
+
+NOTA:para generar el SQL desde un Diagrama:
+File->Export->Forward Engineer SQL CREATE Script
+En cuanto al lenguaje con utf8_bin Lucas asegura que no hay problemas.
+
+IMPORTANTE: una foreign key será un index.Un index normal puede ser null mientras que una Primary Key no puede ser null.
+
+				RESTRICCIONES DE INTEGRIDAD REFERENCIAL
+
+Las relaciones existentes entre distintas tablas de una base de datos MySQL que utiliza el motor de almacenamiento InnoDB pueden estar especificadas en forma de restricciones de clave externa(Foreign Key Constraints) de manera que la propia base de datos impida que se realicen operaciones que provocarían inconsistencias
+
+El comportamiento por defecto de una Foreign Key es impedir un cambio en la base de datos como consecuencia de una sentencia Delete o Update,si esta trajera como consecuencia un fallo en la integridad referencial
+
+RESTRICT: es el comportamiento por defecto recién citado,que impide modificaciones que atenten contra la integridad referencial.
+* Si intento borrar un profesor que tenga una academia asignada no lo hará,es decir bloquea cualquier registro referenciado(salvaguardando asi la integridad referencial mencionada).
+
+CASCADE: borrará todos los registros e,incluso,si el registro en la tabla referenciada queda huerfáno también lo borra.
+
+SET NULL: establece a null el valor de la FK cuando se elimina el registro de la tabla principal.Si quedará huerfáno también borraría ese campo referenciado.
+
+NO ACTION: igual que RESTRICT.
+
+Resumen:
+CASCADE: Cuando se hace UPDATE/DELETE en la tabla padre, automáticamente se actualizarán/borrarán las filas relacionadas de la tabla hija.
+
+SET NULL: Cuando se hace UPDATE/DELETE en la tabla padre, las claves foráneas de las filas relacionadas en la tabla hija se pondrán a NULL. Es importante asegurarse que esos campos no tendrán la restricción de NOT NULL o podrás recibir errores.
+RESTRICT: si se intenta hacer una acción de UPDATE/DELETE en la tabla padre ésta será rechazada automáticamente.
+
+NO ACTION: Ésta es una palabra clave de SQL, en MySQL es equivalente a RESTRICT.
+
+Obviamente para este ejemplo no queremos CASCADE,asi que bloquearemos con RESTRICT poder borrar cualquier registro para salvaguardar la integridad referencial.
+
+Dado que no tengo datos puedo usar PhpMyAdmin para insertar datos.
+También puedo exportar la base de datos,o una única tabla
+
+					SQL -STRUCTURED QUERY LANGUAGE
+
+Realmente este lenguaje tiene más de 50 años.Lo inventó IBM en los años 70 y aún se sigue usando dado su robustez.En 1979 Oracle inventó su DB y modificó un poco el lenguaje.
+Hay varios gestores de bases de datos,y el lenguaje SQL puede variar un poco.
+
+Tipos de Consultas:
+CREATE DATABASE -> crear base de datos
+DROP DATABASE -> eliminar una base de datos
+CREATE TABLE -> crear una tabla
+ALTER TABLE -> modificar una tabla
+DROP TABLE -> eliminar una tabla
+
+SELECT | INSERT | UPDATE | DELETE
+
+				GESTIONAR SCHEMA
+
+Agregar una base de datos:
+CREATE DATABASE sistema_veterinaria;
+Eliminar una base de datos:
+DROP DATABASE IF EXISTS sistema_veterinaria;
+
+* Para todo lo que es bases de datos normalmente se usa snakeCase(sistema_veterinaria),es decir guiones bajos.
+Un SCHEMA es lo mismo que una DATABASE
+	
+					CREAR TABLAS
+
+Para crear una tabla puedo usar este DDL:
+CREATE TABLE usuarios(
+ id int(11) NOT NULL AUTO_INCREMENT,
+ nombre varchar(80) NOT NULL,
+ apellido varchar(80) NOT NULL,
+ fecha_nacimiento DATETIME NULL, <- recuerda no usar TIMESTAMP
+ PRIMARY KEY(id)
+);
+DROP TABLE IF EXISTS usuarios;
+SHOW COLUMNS FROM usuarios; <- para ver información sobre la tabla.Muy útil.
+SELECT DATABASE(); <- para ver la database en la que estoy actualmente.Muy útil.
+SHOW TABLES; <- para ver las tablas de la database en la que estoy.
+NOTA: AUTO_INCREMENT es propio de MySQL,Otros gestores necesitan otro proceso.
+
+					MODIFICAR TABLAS
+
+Agregar columnas:
+ALTER TABLE usuarios ADD COLUMN telefono varchar(45) NULL;
+Eliminar columnas:
+ALTER TABLE usuarios DROP telefono; <- también drop column <name>
+Modificar columnas:
+alter table usuarios alter column telefono varchar(35) null; <- ojo, es modify column en MySQL y no alter column
+
+IMPORTANTE: si bajo la longitud de un campo el gestor va a cortar por esa longitud sin preguntar,hay que tener cuidado al alterar la longitud de columnas con datos.
+
+NOTA: Lucas proporciona una web donde jugar y practicar con SQL:
+http://sqlfiddle.com/
+
+
+				AGREGAR, MODIFICAR Y ELIMINAR DATOS EN UNA TABLA
+
+Para agregar datos es bastante sencillo,se usa la sentencia insert into:
+insert into usuarios(nombre,apellido,fecha_nacimiento,telefono) values('Lucas','Moy','1998-04-04 10:00:00','123123123');
+
+Para borrar una fila siempre debo proporcionar una condición.Se usa la sentencia delete from con una condición:
+delete from usuarios where id='1';
+
+Para modificar los datos de una tabla se usa la sentencia Update con un filtro.Recuerda que lleva SET separado por comas normales:
+update usuarios set nombre='pepe',apellido='perez' where id=1;
+REcuerda que dejo este tutorial con imagenes para consultarlo siempre
+
+					CONSULTAR DATOS DE UNA TABLA
+
+Para consultar datos en una tabla SQL se usa la sentencia select:
+select * from usuarios; <- busca todo
+select * from usuarios where id=1; <- busca todo en base a ese filtro
+select nombre,apellido from usuarios where id=1; <- muestra esos campos en base al filtro
+select concat(nombre," ",apellido) as nombre_completo from usuarios where id=1; <- puedo combinar la salida de varias columnas en una sola y renombrar esa salida
+1h50m
