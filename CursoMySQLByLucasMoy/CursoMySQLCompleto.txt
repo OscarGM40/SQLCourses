@@ -183,9 +183,107 @@ REcuerda que dejo este tutorial con imagenes para consultarlo siempre
 
 					CONSULTAR DATOS DE UNA TABLA
 
-Para consultar datos en una tabla SQL se usa la sentencia select:
+Para consultar datos en una tabla SQL se usa la sentencia select.Ejemplos:
+
 select * from usuarios; <- busca todo
 select * from usuarios where id=1; <- busca todo en base a ese filtro
 select nombre,apellido from usuarios where id=1; <- muestra esos campos en base al filtro
 select concat(nombre," ",apellido) as nombre_completo from usuarios where id=1; <- puedo combinar la salida de varias columnas en una sola y renombrar esa salida
-1h50m
+
+select concat(nombre," ",apellido) as nombre_completo,fecha_nacimiento as fecha from usuarios;
+
+IMPORTANTE:podria ver las sentencias update y delete como un put y un delete,es decir ,siempre van a necesitar un id,o de lo contrario actuan sobre todos los registros,mucho ojo con esto.
+OBviamente el filtro puede ser cualquier campo,o incluso varios o una opción de varios:
+select * from usuarios where apellido="Moy" or nombre ="Lucas";
+
+COUNT: con count puedo contrario
+select count(*) from usuarios where apellido='moira' <- dará 1.
+Claro que es mejor darle un alias:
+select count(*) as users from usuarios where apellido='moira';
+
+LIKE:like en principio es igual que en =,pero mucho más potente ya que puedo usar caracteres especiales dentro de él,como el símbolo de porcentaje:
+select * from usuarios where nombre like='luc%'; <- que empiece por
+select * from usuarios where nombre like='%ucas'; <- que termine en 'ucas' y empiece por lo que sea
+
+NOTA:puedo ver que la clausula where funciona en cualquier sentencia,aunque es obligatoria en los updates y deletes(si no quiero borrar todo).
+
+					CLAVES FORÁNEAS
+
+Para crear una llave foránea debo usar la sintaxis <foreign key(field from this table with the fk) references table(field).Por ejemplo,creemos una tabla publicaciones con la clave foranea autor_id,que referencia al id de nuestra tabla usuarios:
+create table publicaciones (
+  id int(11) auto_increment,
+  autor_id int(11) not null,
+  titulo varchar(80) not null,
+  texto text not null,
+  primary key(id), <- realmente puedo resumir esto
+  foreign key (autor_id) references usuarios(id)); 
+
+Desde luego es sencillo.Sin embargo,puedo apreciar que no es tán fácil ver quien tiene la clave foránea,por eso es altamente recomendable crear los diagramas primero.
+Inserto alguna publicacion
+
+En cuanto tenga tablas con llaves foraneas puedo realizar consultas más complejas
+				
+					CONSULTAR VARIAS TABLAS
+
+Puedo consultar varias tablas de varias formas.Una muy comun es usando alias:
+select p.*,concat(u.nombre,' ',u.apellido) as autor from publicaciones p,usuarios u where p.autor_id=u.id;
+
+IMPORTANTE: puedo ver en la parte del from que estoy eligiendo dos tablas,además de darlas una abreviación(puedo abreviar una tabla pasando un alias automáticamente tras ella).Esto es imprescindible.
+Lo mismo para pasarle el campo con la clave foránea.Fijate en el p.*
+
+IMPORTANTE: usar esta forma de unir tablas no es lo más eficiente,ya que cuando pongo lógica en el lado del where la va a ejecutar por cada registro.Si tuviera miles de ellos por cada uno el gestor estaría ejecutando esa lógica,comparando tablas y buscando esa igualdad por cada registro.Obviamente no es eficiente.
+
+Y justo por ello he especificado claves foráneas,al crear una clave foránea se crea un indice y buscar por un campo ya indexado es mucho más rápido
+
+NOTA:fijate que la consulta primera funcionaría sin usar 'foreign key(autor_id) references usuarios(id),pues la lógica es correcta.Sin embargo esta sentencia creó un indice en el campo autor_id que debo usar por eficiencia.
+
+					JOINS(CONSULTAS OPTIMIZADAS)
+
+Con los joins puedo crear consultas muy optimizadas(debido a la indexación de los campos).Simplemente hay que pasar el tipo de join entre las tablas y cambiar where por on.Ejemplo:
+
+select p.*,u.* from publicaciones p inner join usuarios u on p.autor_id=u.id;
+* con natural join puedo evitar la parte del on:
+select * from publicaciones natural join usuarios;
+
+select count(distinct(texto) from usuarios natural join publicaciones; <- cuenta los distintos textos
+
+En realidad hay muchos tipos,Lucas proporciona una imagen muy buena.Por ejemplo,si uso un left join de estas dos tablas me va a devolver todos los registros de la tabla de la izquierda,y solo los que cumplan estar relacionados entre usuarios y publicaciones,es decir me devuelve todos los usuarios y solo las publicaciones que tengan el campo_id:
+
+mysql> select p.id,p.texto,u.nombre,u.apellido from usuarios u left join publicaciones p on u.id=p.autor_id;
++------+------------------------------------------+--------+----------+
+| id   | texto                                    | nombre | apellido |
++------+------------------------------------------+--------+----------+
+|    1 | publicacion primera de lucas             | lukaz  | moira    |
+|    2 | publicacion segunda de lucas             | lukaz  | moira    |
+|    3 | esta es la publicacion primera de obiwan | obiwan | kenobi   |
+| NULL | NULL                                     | maria  | gracia   |
++------+------------------------------------------+--------+----------+
+* Puedo ver que me devolverá todos los usuarios,independientemente de si tienen publicaciones o no,mientras que las publicaciones deben tener asociado un usuario
+
+Viendo el gráfico puedo ver que puedo realizar cualquier virgeria,como por ejemplo devolver todos los usuarios y todas las publicaciones que no estén relacionadas.Ejemplo:
+select * from usuarios u full outer join publicaciones p on u.id=p.autor_id where u.id is null or p.autor_id is null; 
++------+-------+--------+----------+
+| id   | texto | nombre | apellido |
++------+-------+--------+----------+
+| NULL | NULL  | maria  | gracia   |
++------+-------+--------+----------+
+Obviamente sólo sale maria,que no tiene publicaciones.Observa que siempre estoy hablando de relaciones,clientes que tengan cuenta,clientes que no tengan cuenta,...Muy útil.
+
+					SQL PARA ESTADISTICAS
+
+Es muy común utilizar consultas SQL para sacar estadisticas,el registro minimo o maximo,por ejemplo con precios,para calcular promedios,o contar registros que cumplan determinadas condiciones.
+
+Count(*) <- cuenta la cantidad de registros.Fijate que por defecto es filtro es *,es decir que no hay filtro y cuenta todo,por lo que puede ser util para contar una tabla rápidamente.
+
+Max(filtro) <- devuelve el máximo de ese filtro
+min(filtro) <- devuelve el mínimo de ese filtro
+avg(filtro) <- devuelve el promedio(la media)
+sum(filtro) <- devuelve la sumatoria o acumulado
+
+minuto 2h10m
+
+
+En este caso solo tengo un usuario 
+
+
+ 
