@@ -280,10 +280,57 @@ min(filtro) <- devuelve el mínimo de ese filtro
 avg(filtro) <- devuelve el promedio(la media)
 sum(filtro) <- devuelve la sumatoria o acumulado
 
-minuto 2h10m
+select min(id) from usuarios; <- devuelve 1
+select avg(id) from usuarios; <- devuelve 2.0000
+select sum(id) from usuarios; <- devuelve 6 (1 +2 +3)
+
+Fijate que siempre actuan sobre una columna
+
+						SUBCONSULTAS
+
+La idea de las subconsultas es pasar como argumentos para una consulta el resultado de otra consulta.POr ejemplo,en vez de realizar esto,ya que realmente yo no sé los ids de una tabla:
+select * from publicaciones where autor_id in(1,2,3); <- como puedo saber los ids
+
+Yo no sabré si son 3 o 500.Entonces lo que hago es realizar una consulta dentro de esa consulta:
+
+select * from publicaciones where autor_id in(
+  select id from usuarios  where nombre like 'L%' <- todos los usuarios que empiecen por L
+);
+
+usar IN y NOT IN suele ir acompañado de subconsultas,ya que es mejor traer los valores dinámicamente y no hardcodeados.
+
+						CONCATENAR CONSULTAS
+
+Para concatenar consultas se utiliza la palabar union.Por ejemplo:
+select * from usuarios where nombre like "l%" union select * from usuarios where nombre like "p%";
+NOTA: las consultas deben traer el mismo numero de columnas,no puede traer una tres columnas y otra dos
+
+						AGRUPAR
+
+Por último la claúsula group by <condition> agrupa en base a una condición,por ejemplo podriamos agrupar por nombre:
+select * from usuarios group by edad;
+
+Group by solo agrupa,pero puede ser útil para agrupar for fechas(usando month o year)
+select * from usuarios group by year(fecha_nacimiento);
+
+Una vez con esto claro puedo empezar a contar por ejemplo:
+select count(*),month(fecha_nacimiento) from usuarios group by month(fecha_nacimiento); <- cuenta por mes
+
+mysql> select count(*) as cantidad ,year(fecha_nacimiento)as año from usuarios group
+by year(fecha_nacimiento);
++----------+------+
+| cantidad | año  |
++----------+------+
+|        2 | 1998 |
+|        1 | 1999 |
++----------+------+
 
 
-En este caso solo tengo un usuario 
+NOTA: Si tengo este error:
 
+Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'returntr_prod.tbl_customer_pod_uploads.id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 
+will be simply solved by changing the sql mode in MySQL by this command,
+
+SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
  
